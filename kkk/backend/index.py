@@ -28,6 +28,11 @@ class SentimentResult(BaseModel):
     text: str
     sentiment: str
 
+# Global variables to store results and word cloud data
+results = []
+sentiment_counts = {"positive": 0, "negative": 0, "neutral": 0}
+word_cloud_data = []
+
 def preprocess_text(text: str) -> str:
     # Remove URLs, special characters, and numbers
     text = re.sub(r'http\S+', '', text)
@@ -70,6 +75,7 @@ async def analyze_csv(file: UploadFile = File(...)):
         comments = df[comment_column].dropna().tolist()  # Drop NaN values and convert to list
         
         # Analyze sentiment for each comment
+        global results, sentiment_counts, word_cloud_data
         results = []
         sentiment_counts = {"positive": 0, "negative": 0, "neutral": 0}
         
@@ -79,12 +85,43 @@ async def analyze_csv(file: UploadFile = File(...)):
             results.append({"text": comment, "sentiment": sentiment})
             sentiment_counts[sentiment] += 1
         
+        # Generate word cloud data
+        all_words = [word for result in results for word in result['text'].split()]
+        word_frequency = {}
+        for word in all_words:
+            if len(word) > 2:  # Ignore short words
+                word_frequency[word] = word_frequency.get(word, 0) + 1
+        word_cloud_data = [{"text": word, "value": freq} for word, freq in word_frequency.items()]
+        
         return {"results": results, "sentiment_counts": sentiment_counts}
     
     except pd.errors.ParserError as e:
         raise HTTPException(status_code=400, detail=f"Error parsing CSV file: {str(e)}")
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error processing the CSV file: {str(e)}")
+
+@app.get("/generate-pie-chart/")
+async def generate_pie_chart():
+    if not results:
+        raise HTTPException(status_code=400, detail="No data available. Please upload a CSV file first.")
+    
+    return {
+        "labels": ["Positive", "Negative", "Neutral"],
+        "datasets": [
+            {
+                "data": [sentiment_counts["positive"], sentiment_counts["negative"], sentiment_counts["neutral"]],
+                "backgroundColor": ["#36A2EB", "#FF6384", "#FFCE56"],
+                "hoverBackgroundColor": ["#36A2EB", "#FF6384", "#FFCE56"],
+            }
+        ]
+    }
+
+@app.get("/generate-word-cloud/")
+async def generate_word_cloud():
+    if not word_cloud_data:
+        raise HTTPException(status_code=400, detail="No data available. Please upload a CSV file first.")
+    
+    return word_cloud_data
 
 @app.get("/")
 async def read_root():
