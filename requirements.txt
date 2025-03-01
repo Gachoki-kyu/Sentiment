@@ -6,6 +6,7 @@ dnspython==2.7.0
 email_validator==2.2.0
 fastapi==0.115.8
 fastapi-cli==0.0.7
+gunicorn==23.0.0
 h11==0.14.0
 httpcore==1.0.7
 httptools==0.6.4
@@ -20,6 +21,7 @@ mdurl==0.1.2
 nltk==3.9.1
 numpy==2.2.3
 orjson==3.10.15
+packaging==24.2
 pandas==2.2.3
 pydantic==2.10.6
 pydantic-extra-types==2.10.2
