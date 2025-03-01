@@ -21,14 +21,13 @@ app.add_middleware(
 )
 
 # Download NLTK data
-nltk,data.path.append("./nltk_data")
+nltk.data.path.append("./nltk_data")
 nltk.download('punkt')
 nltk.download('stopwords')
 
 class SentimentResult(BaseModel):
     text: str
     sentiment: str
-
 # Global variables to store results and word cloud data
 results = []
 sentiment_counts = {"positive": 0, "negative": 0, "neutral": 0}
