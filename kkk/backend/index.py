@@ -23,7 +23,7 @@ app.add_middleware(
 # Download NLTK data
 nltk.data.path.append("/opt/render/nltk_data")
 nltk.download('punkt')
-nltk.download('punk_tab')
+nltk.download('punkt_tab')
 nltk.download('stopwords')
 
 class SentimentResult(BaseModel):
